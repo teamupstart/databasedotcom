@@ -17,7 +17,8 @@ module Databasedotcom
           if field['type'] =~ /(picklist|multipicklist)/ && picklist_option = field['picklistValues'].find { |p| p['defaultValue'] }
             self.send("#{field["name"]}=", picklist_option["value"])
           elsif field['type'] =~ /boolean/
-            self.send("#{field["name"]}=", field["defaultValue"])
+            # Coerce default value to boolean, since it may be nil and nil is invalid type
+            self.send("#{field["name"]}=", !!field["defaultValue"])
           else
             self.send("#{field["name"]}=", field["defaultValueFormula"])
           end
@@ -32,7 +33,7 @@ module Databasedotcom
           hash
         end
       end
-      
+
       # Set attributes of this object, from a hash, in bulk
       def attributes=(attrs)
         attrs.each do |key, value|
@@ -104,8 +105,8 @@ module Databasedotcom
         selection_attr = self.Id.nil? ? "createable" : "updateable"
         self.class.description["fields"].select { |f| f[selection_attr] }.collect { |f| f["name"] }.each { |attr| attr_hash[attr] = self.send(attr) }
 
-        # allow fields to be removed on a case by case basis as some data is not allowed to be saved 
-        # (e.g. Name field on Account with record type of Person Account) despite the API listing 
+        # allow fields to be removed on a case by case basis as some data is not allowed to be saved
+        # (e.g. Name field on Account with record type of Person Account) despite the API listing
         # some fields as editable
         if options[:exclusions] and options[:exclusions].respond_to?(:include?) then
           attr_hash.delete_if { |key, value| options[:exclusions].include?(key.to_s) }
