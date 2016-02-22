@@ -51,8 +51,8 @@ describe Databasedotcom::Sobject::Sobject do
                 @sobject.send(f['name'].to_sym).should == picklist_option['value']
               end
             elsif f['type'] =~ /boolean/
-              it "sets #{f['name']} to #{f['defaultValue']}" do
-                @sobject.send(f['name'].to_sym).should == f['defaultValue']
+              it "sets #{f['name']} to boolean #{f['defaultValue']}" do
+                @sobject.send(f['name'].to_sym).should == !!f['defaultValue']
               end
             else
               it "sets #{f['name']} to #{f['defaultValueFormula'] ? f['defaultValueFormula'] : 'nil'}" do
@@ -582,18 +582,18 @@ describe Databasedotcom::Sobject::Sobject do
             attrs.include?("OwnerId").should be_truthy
             @obj_double
           end
-          
+
           @obj.save(:exclusions => ["Name"])
         end
-        
+
         it "remove any listed fields from the attributes on update" do
           @obj.Id = "foo"
-          
+
           @client.should_receive(:update) do |clazz, id, attrs|
             attrs.include?("Name").should be_falsey
             attrs.include?("OwnerId").should be_truthy
           end
-          
+
           result = @obj.save(:exclusions => ["Name"])
         end
       end
